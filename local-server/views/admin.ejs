@@ -6,12 +6,12 @@
 <!--[if IE 9]>    <html class="lt-ie10 lt-ie9" lang="en"> <![endif]-->
 <!--[if gt IE 9]><!--> <html lang="en"> <!--<![endif]-->
 <head>
-  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-  <meta name="author" content="Luis Leao">
-  <meta name="description" content="self-checkin system">
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+	<meta name="author" content="Luis Leao">
+	<meta name="description" content="self-checkin system">
 
-  <title>GDG self-checkin</title>
-  <link href='http://fonts.googleapis.com/css?family=Roboto+Slab|Roboto+Condensed|Roboto' rel='stylesheet' type='text/css'>
+	<title>GDG self-checkin</title>
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Slab|Roboto+Condensed|Roboto' rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -68,7 +68,7 @@
 		}
 
 
-		.tipo, .tipo_inscricao, .status_inscricao, .credenciado, .id_imasters {
+		.tipo, .eventick_code, .status_inscricao, .credenciado, .id_imasters {
 			text-align: center;
 		}
 		.credenciado {
@@ -104,9 +104,9 @@
 
 
 	<div id="topo">
-		<h1>self-checkin DevFest São Paulo 2013</h1>
+		<h1>Self-checkin StartupVale 2014</h1>
 		<h2 id="totalizador">inscrições total/confirmadas: <span></span></h2>
-		<h3>Desenvolvido pelo GDG São Paulo - Novembro/2013</h3>
+		<h3>Desenvolvido por GDG São Paulo </h3>
 		<img src="/img/devfest.png" alt="" id="logo" />
 
 	</div>
@@ -118,38 +118,14 @@
 			<input type="button" id="pickerButton" style="display: none" value="Choose Spreadsheet"/>
 			<input type="button" id="authorizeButton" style="display: none" value="Authorize" />
 			<span id="planilha"></span>
-
 		</div>
 
-
-
 		<ul id="inscritos">
-
-
-
-
 			<li id="abcd" class="confirmado">
-	<!--
-	 			<span class="nome"></span>
-				<span class="email"></span>
-				<span class="tipo"></span>
-				<span class="tipo_inscricao"></span>
-				<span class="status_inscricao"></span>
-				<span class="credenciado"></span>
-				<span class="etiqueta"></span>
-	 -->
-	 		</li>
-
-
-
-
+			</li>
 		</ul>
 
 	</div>
-
-
-
-
 
 
 	<script src="/socket.io/socket.io.js"></script>
@@ -162,19 +138,27 @@
 		var socket = io.connect("http://"+location.hostname+"/admin");
 
 		socket.on("checkin", function(data){
+			
 			console.log("checkin", data);
+			
 			result = {
 				"mensagem": "",
 				"socket_id": data.socket_id
 			}
 
+			var value;
+			var attendee;
+			
+			if (data.id.indexOf("@") > -1){
+				attendee = attendees[data.id];
+			}else{
+				value = data.id.split(":")[1].toUpperCase();
+				attendee = findByCode(value);
+			}
 
-			if (!attendees[data.id]) {
+			if (!attendee) {
 				result.mensagem = data.id + " NÃO ENCONTRADO!";
-
 			} else {
-				var attendee = attendees[data.id];
-
 				if (attendee.credenciado) {
 					result.mensagem = attendee.nome + " você já foi credenciado.";
 				} else {
@@ -197,14 +181,25 @@
 		})
 
 
+		findByCode = function(code) {
+			var value = null;
 
+			$.each(attendees, function(key, val) { 
+				if (val.eventick_code == code) {
+					value = val;
+					return false;      
+				}
+			});
+
+			return value;
+		};
 
 		function load_file() {
 
 			if (!window.fs)
 				return;
 
-			fs.root.getFile("atendentes.json", { create: false }, function(fileEntry) {
+			fs.root.getFile("startt.json", { create: false }, function(fileEntry) {
 
 				// Get a File object representing the file,
 				// then use FileReader to read its contents.
@@ -213,14 +208,14 @@
 					reader.onloadend = function(e) {
 						window.XXX = this.result;
 						console.log("Carregando JSON..."); //, this.result, this.result.length);
-						attendees = JSON.parse(this.result);
+				attendees = JSON.parse(this.result);
 						console.log("CARREGOU JSON!"); //, this.result, this.result.length);
-						update_ui();
-					};
+				update_ui();
+			};
 
-					reader.readAsText(file);
+			reader.readAsText(file);
 
-				}, errorHandler);
+		}, errorHandler);
 
 			}, errorHandler);
 
@@ -243,7 +238,7 @@
 				return;
 
 			//sobrescrever arquivo ateendees.json
-			fs.root.getFile("atendentes.json", {create: true, exclusive: false}, function(fileEntry) {
+			fs.root.getFile("startt.json", {create: true, exclusive: false}, function(fileEntry) {
 				console.log("creating writer...");
 
 
@@ -280,7 +275,7 @@
 				var nome = item[0];
 				var tipo = item[1];
 				var id_imasters = item[3];
-				var tipo_inscricao = item[4];
+				var eventick_code = item[4];
 				var tamanho_camiseta = item[5];
 				var valor_pago = item[6];
 				var data_inscricao = item[7];
@@ -296,7 +291,7 @@
 				attendee.email = email;
 				attendee.nome = nome;
 				attendee.tipo = tipo;
-				attendee.tipo_inscricao = tipo_inscricao;
+				attendee.eventick_code = eventick_code;
 				attendee.id_imasters = id_imasters
 				attendee.tamanho_camiseta = tamanho_camiseta;
 				attendee.valor_pago = valor_pago;
@@ -343,7 +338,7 @@
 				itm.append($("<span/>").addClass("nome").text(attendee.nome));
 				itm.append($("<span/>").addClass("email").text(attendee.email));
 				itm.append($("<span/>").addClass("tipo").text(attendee.tipo));
-				itm.append($("<span/>").addClass("tipo_inscricao").text(attendee.tipo_inscricao));
+				itm.append($("<span/>").addClass("eventick_code").text(attendee.eventick_code));
 				itm.append($("<span/>").addClass("id_imasters").text("["+attendee.id_imasters+"]"));
 				itm.append($("<span/>").addClass("status_inscricao").text(attendee.status_inscricao));
 				itm.append($("<span/>").addClass("credenciado").text(attendee.credenciado ? attendee.credenciado : "-"));
@@ -369,15 +364,15 @@
 		}
 
 
-		var CLIENT_ID_REMOTE = '161435449296.apps.googleusercontent.com';
-		var CLIENT_ID_LOCAL = '161435449296-3the66rqmokkivtp5g4l9vl9klg64nuj.apps.googleusercontent.com';
+		var CLIENT_ID_REMOTE = '4981587102-so66vtulamdvjc8hn4ihv83cnp91pc4v.apps.googleusercontent.com';
+		var CLIENT_ID_LOCAL = '4981587102-so66vtulamdvjc8hn4ihv83cnp91pc4v@developer.gserviceaccount.com';
 
-		var CLIENT_ID = location.hostname == "luisleao.com.br" ? CLIENT_ID_REMOTE : CLIENT_ID_LOCAL;
+		var CLIENT_ID = CLIENT_ID_LOCAL;
 
 		var SCOPES = [
-			'https://www.googleapis.com/auth/drive',
-			'https://www.googleapis.com/auth/drive.file',
-			'https://spreadsheets.google.com/feeds',
+		'https://www.googleapis.com/auth/drive',
+		'https://www.googleapis.com/auth/drive.file',
+		'https://spreadsheets.google.com/feeds',
 		];
 
 		// Use your own API developer key.
@@ -432,7 +427,7 @@
 					return;
 				}
 
-				if (!confirm("Deseja credenciar " + attendee.email + "\n\n" + attendee.nome + "\n" + attendee.tipo_inscricao))
+				if (!confirm("Deseja credenciar " + attendee.email + "\n\n" + attendee.nome + "\n" + attendee.eventick_code))
 					return;
 
 
@@ -444,15 +439,10 @@
 
 			});
 
-
-
-
 			//FILESYSTEM
 			// Note: The file system has been prefixed as of Google Chrome 12:
 			window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
 			//window.requestFileSystem(type, size, successCallback, opt_errorCallback)
-
-
 
 			function onInitFs(fs) {
 				console.log('Opened file system: ' + fs.name);
@@ -462,16 +452,6 @@
 
 			}
 
-
-
-
-			//window.requestFileSystem(window.PERSISTENT, 10*1024*1024 /*5MB*/, onInitFs, errorHandler);
-			// window.webkitStorageInfo.requestQuota(PERSISTENT, 10%1024*1024, function(grantedBytes) {
-			// 	window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
-			// }, function(e) {
-			// 	console.log('Error', e);
-			// });
-
 			navigator.webkitPersistentStorage.requestQuota(10*1024*1024, function(grantedBytes) {
 				window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
 			}, function(e) {
@@ -480,28 +460,15 @@
 
 		});
 
+function printLabel(nome, tipo) {
+	if (printers.length == 0 || !label) return;
+	if (!tipo) tipo = "";
+	label.setObjectText("nome", nome);
+	label.setObjectText("tipo", tipo);
+	label.print(printers[0].name);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-		function printLabel(nome, tipo) {
-			if (printers.length == 0 || !label) return;
-			if (!tipo) tipo = "";
-			label.setObjectText("nome", nome);
-			label.setObjectText("tipo", tipo);
-			label.print(printers[0].name);
-		}
-
-		function loadLabelFromWeb() {                     
+function loadLabelFromWeb() {                     
 			// use jQuery API to load label
 			$.get("/labels/devfest.label", function(labelXml) {
 				label = dymo.label.framework.openLabelXml(labelXml);
@@ -509,19 +476,6 @@
 				// check that label has an address object
 			}, "text");
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 		/**
 		* Called when the client library is loaded to start the auth flow.
@@ -540,7 +494,7 @@
 		function checkAuth() {
 			gapi.auth.authorize(
 				{'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true},
-			handleAuthResult);
+				handleAuthResult);
 		}
 
 
@@ -576,9 +530,9 @@
 				// No access token could be retrieved, show the button to start the authorization flow.
 				authButton.style.display = 'block';
 				authButton.onclick = function() {
-				gapi.auth.authorize(
-					{'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false},
-					handleAuthResult);
+					gapi.auth.authorize(
+						{'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false},
+						handleAuthResult);
 				};
 			}
 		}
@@ -599,18 +553,18 @@
 			//view.setMimeTypes("application/vnd.google-apps.spreadsheet");    
 
 			var picker = new google.picker.PickerBuilder()
-				.enableFeature(google.picker.Feature.NAV_HIDDEN)
+			.enableFeature(google.picker.Feature.NAV_HIDDEN)
 				//.enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
 				.setAppId(CLIENT_ID)
-				//.setOAuthToken(gapi.auth.getToken().access_token) //Optional: The auth token used in the current Drive API session.
+				.setOAuthToken(gapi.auth.getToken().access_token) //Optional: The auth token used in the current Drive API session.
 				.addView(view)
 				.addView(new google.picker.DocsUploadView())
 				.setCallback(pickerCallback)
 				.setTitle("Open attendees list")
 				.build();
 
-			picker.setVisible(true);
-		}
+				picker.setVisible(true);
+			}
 
 		// A simple callback implementation.
 		function pickerCallback(data) {
@@ -676,12 +630,12 @@
 							update_planilha();
 
 						});
-					});
+});
 
-				});
+});
 
-			}
-		}
+}
+}
 
 
 
@@ -702,5 +656,5 @@
 
 
 
-  </body>
+</body>
 </html>

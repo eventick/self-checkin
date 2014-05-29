@@ -7,10 +7,10 @@ var express = require("express")
 ;
 
 
-var KEY_ID = "g4rbVcBTVfMFMf4GeZFTjxheBqgAQbc5nJGqef5UtvBZFth8"; //"devfestsp2013gdg"
+var KEY_ID = "startupvale2014"; //"devfestsp2013gdg"
 var server_started = false;
 
-server.listen(3000);
+server.listen(8080);
 
 app.use(express.static(__dirname + "/public"));
 
@@ -48,12 +48,6 @@ app.get("/admin", function(req, res) {
   res.render("admin");
 });
 
-
-
-
-
-
-
 function setupSockets () {
   if (server_started) return;
   if (!io) {
@@ -81,10 +75,8 @@ function setupSockets () {
 
   });
 
-
-
   var client = io
-    .of('')
+    .of('/')
     .on('connection', function (socket) {
 
       console.log("CLIENT CONNECTED!");
@@ -99,8 +91,6 @@ function setupSockets () {
 
 
   });
-
-
 
   server_started = true;
 }

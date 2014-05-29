@@ -142,8 +142,8 @@
 
 		socket.on("checkin result", function(data){
 			console.log("CHECKIN RESULT!");
-			if (data.socket_id != socket.socket.sessionid)
-				return;
+			// if (data.socket_id != socket.socket.sessionid)
+				// return;
 			showMessage(data.mensagem.replace("\n","<br/>"), 3000);
 		});
 
