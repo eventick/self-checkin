@@ -109,6 +109,7 @@
 		<h1>Self-checkin StartupVale 2014</h1>
 		<h2 id="totalizador">inscrições total/confirmadas: <span></span></h2>
 		<h3>Desenvolvido por GDG São Paulo </h3>
+		<button onclick="newAttendee();"> Gerar Credencial </button>
 		<img src="/img/logo-startup-vale.png" alt="" id="logo" />
 
 	</div>
@@ -182,6 +183,12 @@
 			printLabel(data[0], data[1]);
 		})
 
+		newAttendee = function(){
+			name = window.prompt("Digite o nome do participante: ");
+			if (name != "null"){
+				printLabel(name, "StartupVale 2014");
+			}
+		};
 
 		findByCode = function(code) {
 			var value = null;
